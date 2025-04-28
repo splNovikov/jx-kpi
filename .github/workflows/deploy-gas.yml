@@ -21,18 +21,8 @@ jobs:
       - name: Install clasp
         run: npm install -g @google/clasp
 
-      - name: Create credentials file
-        run: |
-          mkdir -p ~/.config/gclasprc
-          echo '{
-            "installed": {
-              "client_id": "${{ secrets.CLIENT_ID }}",
-              "client_secret": "${{ secrets.CLIENT_SECRET }}",
-              "redirect_uris": ["http://localhost"],
-              "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-              "token_uri": "https://oauth2.googleapis.com/token"
-            }
-          }' > ~/.config/gclasprc/credentials.json
+      - name: Create .clasprc.json
+        run: echo "${{ secrets.CLASPRC_JSON }}" > ~/.clasprc.json
 
       - name: Create .clasp.json
         run: |
@@ -40,10 +30,6 @@ jobs:
             "scriptId": "${{ secrets.SCRIPT_ID }}",
             "rootDir": "./src"
           }' > .clasp.json
-
-      - name: Login to clasp
-        run: |
-          clasp login --creds ~/.config/gclasprc/credentials.json
 
       - name: Deploy with clasp
         run: |
