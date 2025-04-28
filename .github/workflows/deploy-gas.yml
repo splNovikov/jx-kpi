@@ -8,21 +8,43 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - run: npm install -g @google/clasp
+      - name: Install clasp
+        run: npm install -g @google/clasp
 
-      - run: echo "${{ secrets.CLASPRC_JSON }}" > ~/.clasprc.json
+      - name: Check Clasp Version
+        run: clasp --version
 
-      - run: |
+      - name: Create .clasprc.json
+        run: echo "${{ secrets.CLASPRC_JSON }}" > ~/.clasprc.json
+
+      - name: List Home Directory
+        run: |
+          echo "===== Home Directory Files ====="
+          ls -la ~
+          echo "================================="
+
+      - name: Show .clasprc.json contents
+        run: |
+          echo "===== .clasprc.json ====="
+          cat ~/.clasprc.json
+          echo "========================="
+
+      - name: Create .clasp.json
+        run: |
           echo '{
             "scriptId": "${{ secrets.SCRIPT_ID }}",
             "rootDir": "./src"
           }' > .clasp.json
 
-      - run: clasp push --force
+      - name: Deploy with clasp
+        run: clasp push --force
