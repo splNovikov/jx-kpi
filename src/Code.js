@@ -1,4 +1,3 @@
-// check for changes
 function assignManagers() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const allInSheet = ss.getSheetByName("[HARD Copy] all_in_reduced");
@@ -43,9 +42,9 @@ function assignManagers() {
       const managerEnd = new Date(managerRows[j][managerEndIndex]);
 
       const isMatch = (
-          account === managerAccount &&
-          monthDate >= managerStart &&
-          monthDate <= managerEnd
+        account === managerAccount &&
+        monthDate >= managerStart &&
+        monthDate <= managerEnd
       );
 
       if (isMatch) {
