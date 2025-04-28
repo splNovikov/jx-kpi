@@ -26,7 +26,7 @@ jobs:
           mkdir -p ~
           echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
           # Verify JSON format
-          node -e "require('./.clasprc.json')"
+          node -e "require('fs').readFileSync('$HOME/.clasprc.json', 'utf8')"
 
       - name: Create .clasp.json
         run: |
