@@ -1,3 +1,4 @@
+// check for changes
 function assignManagers() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const allInSheet = ss.getSheetByName("[HARD Copy] all_in_reduced");
