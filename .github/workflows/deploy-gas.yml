@@ -32,5 +32,4 @@ jobs:
           }' > .clasp.json
 
       - name: Deploy with clasp
-        run: |
-          clasp push --force 
+        run: clasp push --force
