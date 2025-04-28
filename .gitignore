@@ -1,0 +1,28 @@
+# Ignore Google Apps Script clasp system files
+.clasp.json
+
+# Ignore IDE/project files
+.idea/
+*.iml
+
+# Ignore Mac system files
+.DS_Store
+
+# Node.js dependencies (if any in the future)
+node_modules/
+
+# Python virtual environments (if any in the future)
+venv/
+
+# Python cache
+__pycache__/
+
+# Environment variable files
+.env
+
+# Build output
+/dist/
+/build/
+
+# Logs
+*.log 
