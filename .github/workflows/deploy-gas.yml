@@ -23,8 +23,8 @@ jobs:
 
       - name: Create .clasprc.json
         run: |
-          mkdir -p ~/.config/gclasprc
-          echo "${{ secrets.CLASPRC_JSON }}" > ~/.config/gclasprc/.clasprc.json
+          mkdir -p ~
+          echo "${{ secrets.CLASPRC_JSON }}" > ~/.clasprc.json
 
       - name: Create .clasp.json
         run: |
@@ -35,7 +35,7 @@ jobs:
 
       - name: Login to clasp
         run: |
-          clasp login --creds ~/.config/gclasprc/.clasprc.json
+          clasp login --creds ~/.clasprc.json
 
       - name: Deploy with clasp
         run: |
