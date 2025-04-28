@@ -22,7 +22,9 @@ jobs:
         run: npm install -g @google/clasp
 
       - name: Create .clasprc.json
-        run: echo "${{ secrets.CLASPRC_JSON }}" > ~/.clasprc.json
+        run: |
+          mkdir -p ~/.config/gclasprc
+          echo "${{ secrets.CLASPRC_JSON }}" > ~/.config/gclasprc/.clasprc.json
 
       - name: Create .clasp.json
         run: |
@@ -30,6 +32,10 @@ jobs:
             "scriptId": "${{ secrets.SCRIPT_ID }}",
             "rootDir": "./src"
           }' > .clasp.json
+
+      - name: Login to clasp
+        run: |
+          clasp login --creds ~/.config/gclasprc/.clasprc.json
 
       - name: Deploy with clasp
         run: |
