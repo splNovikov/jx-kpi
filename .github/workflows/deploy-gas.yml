@@ -24,7 +24,9 @@ jobs:
       - name: Create .clasprc.json
         run: |
           mkdir -p ~
-          echo "${{ secrets.CLASPRC_JSON }}" > ~/.clasprc.json
+          echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+          # Verify JSON format
+          node -e "require('./.clasprc.json')"
 
       - name: Create .clasp.json
         run: |
