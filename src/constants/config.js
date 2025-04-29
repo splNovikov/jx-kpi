@@ -18,10 +18,3 @@ const COLUMN_NAMES = {
     NAME: "Name"
   }
 };
-
-// Export as global variables
-Object.assign(this, {
-  SKIP_ACCOUNTS,
-  SHEET_NAMES,
-  COLUMN_NAMES
-}); 

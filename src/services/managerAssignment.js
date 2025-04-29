@@ -1,13 +1,9 @@
-const { SKIP_ACCOUNTS, SHEET_NAMES, COLUMN_NAMES } = require('../constants/config');
-const { getSheetData, updateCellValue } = require('../utils/spreadsheet');
-const { parseMonthString, isDateInRange } = require('../utils/dateUtils');
-
 function findColumnIndex(header, columnName) {
   return header.indexOf(columnName);
 }
 
 function findManagersForAccount(account, monthDate, managerData) {
-  const { header, rows } = managerData;
+  const {header, rows} = managerData;
   const accountIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.ACCOUNT);
   const startDateIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.START_DATE);
   const endDateIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.END_DATE);
@@ -49,8 +45,3 @@ function assignManagers() {
     updateCellValue(SHEET_NAMES.ALL_IN, i, managerIndex, managerValue);
   });
 }
-
-// Export as global function
-Object.assign(this, {
-  assignManagers
-}); 
