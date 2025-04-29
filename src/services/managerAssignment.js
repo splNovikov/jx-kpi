@@ -144,7 +144,7 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow) 
     const lastRowData = inconsistencySheet.getRange(lastRow, 1, 1, 12).getValues()[0];
     const lastAssignmentId = lastRowData[2];
     const isBlankRow = lastRowData.every(cell => cell === " ");
-    
+
     if (!isBlankRow && lastAssignmentId !== currentAssignmentId) {
       const blankRow = Array(12).fill(" ");
       inconsistencySheet.getRange(lastRow + 1, 1, 1, 12).setValues([blankRow]);
@@ -210,14 +210,100 @@ function assignManagers() {
     updates.push([managerValue]);
 
     // Check for inconsistencies
-    if (matchedManagers.length !== 1) {
-      // Log each inconsistency immediately to ensure proper ordering
-      logManagerInconsistency(account, monthDate, matchedManagers, row);
-    }
+    // if (matchedManagers.length !== 1) {
+    //   // Log each inconsistency immediately to ensure proper ordering
+    //   logManagerInconsistency(account, monthDate, matchedManagers, row);
+    // }
   });
 
   // Batch update all cells at once
   const allInSheet = getSheet(SHEET_NAMES.ALL_IN);
   const range = allInSheet.getRange(2, managerIndex + 1, updates.length, 1);
   range.setValues(updates);
+}
+
+function prepareOverlapSheet() {
+  let overlapSheet = getSheet(SHEET_NAMES.MANAGER_OVERLAPS);
+
+  if (!overlapSheet) {
+    const sSheet = SpreadsheetApp.getActiveSpreadsheet();
+    overlapSheet = sSheet.insertSheet(SHEET_NAMES.MANAGER_OVERLAPS);
+    clearSheetCache();
+  } else {
+    overlapSheet.clear();
+    clearSheetCache();
+  }
+
+  // Add headers
+  const headers = [
+    "Account",
+    "Manager 1 Name",
+    "Manager 1 Start Date",
+    "Manager 1 End Date",
+    "Manager 1 Position",
+    "Manager 2 Name",
+    "Manager 2 Start Date",
+    "Manager 2 End Date",
+    "Manager 2 Position",
+    "Overlap Start Date",
+    "Overlap End Date"
+  ];
+  overlapSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+}
+
+function findOverlappingAssignments() {
+  // Initialize indices
+  initializeColumnIndices();
+
+  const managerData = getSheetData(SHEET_NAMES.MANAGER_ASSIGNMENTS);
+  const { cache, indices } = prepareManagerDataCache(managerData);
+
+  // Prepare overlap sheet
+  prepareOverlapSheet();
+  const overlapSheet = getSheet(SHEET_NAMES.MANAGER_OVERLAPS);
+
+  // Process each account
+  const overlaps = [];
+  for (const [account, assignments] of cache) {
+    // Skip if less than 2 assignments
+    if (assignments.length < 2) continue;
+
+    // Compare each pair of assignments
+    for (let i = 0; i < assignments.length - 1; i++) {
+      for (let j = i + 1; j < assignments.length; j++) {
+        const assignment1 = assignments[i];
+        const assignment2 = assignments[j];
+
+        const start1 = new Date(assignment1[indices.startDate]);
+        const end1 = new Date(assignment1[indices.endDate]);
+        const start2 = new Date(assignment2[indices.startDate]);
+        const end2 = new Date(assignment2[indices.endDate]);
+
+        // Check for overlap
+        if (start1 <= end2 && start2 <= end1) {
+          const overlapStart = start1 > start2 ? start1 : start2;
+          const overlapEnd = end1 < end2 ? end1 : end2;
+
+          overlaps.push([
+            account,
+            assignment1[indices.name],
+            assignment1[indices.startDate],
+            assignment1[indices.endDate],
+            assignment1[indices.position],
+            assignment2[indices.name],
+            assignment2[indices.startDate],
+            assignment2[indices.endDate],
+            assignment2[indices.position],
+            overlapStart,
+            overlapEnd
+          ]);
+        }
+      }
+    }
+  }
+
+  // Write overlaps to sheet
+  if (overlaps.length > 0) {
+    overlapSheet.getRange(2, 1, overlaps.length, overlaps[0].length).setValues(overlaps);
+  }
 }

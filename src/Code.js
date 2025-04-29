@@ -26,5 +26,10 @@ function main() {
   assignManagers();
   Logger.log('Step 3 completed: Managers assigned');
 
+  // Step 4: Find overlapping assignments
+  Logger.log('Step 4: Finding overlapping assignments');
+  findOverlappingAssignments();
+  Logger.log('Step 4 completed: Overlapping assignments found');
+
   Logger.log('Main function execution completed successfully');
 }
