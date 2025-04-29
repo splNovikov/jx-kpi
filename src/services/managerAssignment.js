@@ -2,6 +2,9 @@
 let allInIndices = null;
 let managerIndices = null;
 
+// Cache for sheet references
+const sheetCache = new Map();
+
 function initializeColumnIndices() {
   const allInData = getSheetData(SHEET_NAMES.ALL_IN);
   const managerData = getSheetData(SHEET_NAMES.MANAGER_ASSIGNMENTS);
@@ -87,12 +90,21 @@ function findManagersForAccount(account, monthDate, managerData) {
     });
 }
 
+function getSheet(sheetName) {
+  if (!sheetCache.has(sheetName)) {
+    const sSheet = SpreadsheetApp.getActiveSpreadsheet();
+    sheetCache.set(sheetName, sSheet.getSheetByName(sheetName));
+  }
+  return sheetCache.get(sheetName);
+}
+
 function prepareInconsistencySheet() {
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  let inconsistencySheet = sSheet.getSheetByName(SHEET_NAMES.MANAGER_INCONSISTENCY);
+  let inconsistencySheet = getSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
 
   if (!inconsistencySheet) {
+    const sSheet = SpreadsheetApp.getActiveSpreadsheet();
     inconsistencySheet = sSheet.insertSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
+    sheetCache.set(SHEET_NAMES.MANAGER_INCONSISTENCY, inconsistencySheet);
   } else {
     // Clear existing data including headers
     inconsistencySheet.clear();
@@ -117,8 +129,7 @@ function prepareInconsistencySheet() {
 }
 
 function logManagerInconsistency(account, monthDate, matchedManagers, allInRow) {
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const inconsistencySheet = sSheet.getSheetByName(SHEET_NAMES.MANAGER_INCONSISTENCY);
+  const inconsistencySheet = getSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
 
   // Format the data for logging
   const issue = matchedManagers.length === 0 ? "No manager assigned" : "Multiple managers assigned";
@@ -138,7 +149,7 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow) 
     const lastRowData = inconsistencySheet.getRange(lastRow, 1, 1, 12).getValues()[0];
     const lastAssignmentId = lastRowData[2];
     const isBlankRow = lastRowData.every(cell => cell === " ");
-
+    
     if (!isBlankRow && lastAssignmentId !== currentAssignmentId) {
       const blankRow = Array(12).fill(" ");
       inconsistencySheet.getRange(lastRow + 1, 1, 1, 12).setValues([blankRow]);
@@ -211,8 +222,7 @@ function assignManagers() {
   });
 
   // Batch update all cells at once
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = sSheet.getSheetByName(SHEET_NAMES.ALL_IN);
-  const range = sheet.getRange(2, managerIndex + 1, updates.length, 1);
+  const allInSheet = getSheet(SHEET_NAMES.ALL_IN);
+  const range = allInSheet.getRange(2, managerIndex + 1, updates.length, 1);
   range.setValues(updates);
 }
