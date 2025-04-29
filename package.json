@@ -1,0 +1,12 @@
+{
+  "name": "jx-kpi",
+  "version": "1.0.0",
+  "description": "Jaxel KPI Google Apps Script project",
+  "main": "index.js",
+  "dependencies": {
+    "@types/google-apps-script": "^1.0.57"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24"
+  }
+}

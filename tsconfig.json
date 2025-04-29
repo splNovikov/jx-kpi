@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "module": "esnext",
+    "target": "es2019",
+    "types": ["google-apps-script"],
+    "typeRoots": ["./node_modules/@types"],
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+} 
