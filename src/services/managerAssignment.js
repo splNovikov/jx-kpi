@@ -236,17 +236,10 @@ function prepareOverlapSheet() {
 
   // Add headers
   const headers = [
+    "Name",
     "Account",
-    "Manager 1 Name",
-    "Manager 1 Start Date",
-    "Manager 1 End Date",
-    "Manager 1 Position",
-    "Manager 2 Name",
-    "Manager 2 Start Date",
-    "Manager 2 End Date",
-    "Manager 2 Position",
-    "Overlap Start Date",
-    "Overlap End Date"
+    "Start Date",
+    "End Date"
   ];
   overlapSheet.getRange(1, 1, 1, headers.length).setValues([headers]);
 }
@@ -269,6 +262,7 @@ function findOverlappingAssignments() {
     if (assignments.length < 2) continue;
 
     // Compare each pair of assignments
+    let hasOverlap = false;
     for (let i = 0; i < assignments.length - 1; i++) {
       for (let j = i + 1; j < assignments.length; j++) {
         const assignment1 = assignments[i];
@@ -281,24 +275,26 @@ function findOverlappingAssignments() {
 
         // Check for overlap
         if (start1 <= end2 && start2 <= end1) {
-          const overlapStart = start1 > start2 ? start1 : start2;
-          const overlapEnd = end1 < end2 ? end1 : end2;
-
-          overlaps.push([
-            account,
-            assignment1[indices.name],
-            assignment1[indices.startDate],
-            assignment1[indices.endDate],
-            assignment1[indices.position],
-            assignment2[indices.name],
-            assignment2[indices.startDate],
-            assignment2[indices.endDate],
-            assignment2[indices.position],
-            overlapStart,
-            overlapEnd
-          ]);
+          hasOverlap = true;
+          break;
         }
       }
+      if (hasOverlap) break;
+    }
+
+    // If this account has any overlaps, add all its assignments
+    if (hasOverlap) {
+      // Add all assignments for this account
+      assignments.forEach(assignment => {
+        overlaps.push([
+          assignment[indices.name],
+          account,
+          assignment[indices.startDate],
+          assignment[indices.endDate]
+        ]);
+      });
+      // Add empty line after each account group
+      overlaps.push(["", "", "", ""]);
     }
   }
 
