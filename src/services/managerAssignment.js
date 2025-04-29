@@ -28,20 +28,20 @@ function prepareInconsistencySheet() {
     inconsistencySheet = sSheet.insertSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
     // Add headers
     const headers = [
-      "Account",
-      "Month",
+      COLUMN_NAMES.ALL_IN.ACCOUNT,
+      COLUMN_NAMES.ALL_IN.MONTH,
       "Issue",
-      "All In Month",
-      "All In Assignment Id",
-      "All In Name",
-      "All In Account",
-      "All In Start Date",
-      "All In End Date",
-      "Manager Name",
-      "Manager Account",
-      "Manager Start Date",
-      "Manager End Date",
-      "Manager Position"
+      COLUMN_NAMES.ALL_IN.MONTH,
+      COLUMN_NAMES.ALL_IN.ASSIGNMENT_ID,
+      COLUMN_NAMES.ALL_IN.NAME,
+      COLUMN_NAMES.ALL_IN.ACCOUNT,
+      COLUMN_NAMES.ALL_IN.START_DATE,
+      COLUMN_NAMES.ALL_IN.END_DATE,
+      COLUMN_NAMES.MANAGER.NAME,
+      COLUMN_NAMES.MANAGER.ACCOUNT,
+      COLUMN_NAMES.MANAGER.START_DATE,
+      COLUMN_NAMES.MANAGER.END_DATE,
+      COLUMN_NAMES.MANAGER.POSITION
     ];
     inconsistencySheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   } else {
