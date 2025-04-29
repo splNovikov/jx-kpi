@@ -31,8 +31,17 @@ function prepareInconsistencySheet() {
       "Account",
       "Month",
       "Issue",
-      "All In Data",
-      "Manager Assignment Data"
+      "All In Month",
+      "All In Assignment Id",
+      "All In Name",
+      "All In Account",
+      "All In Start Date",
+      "All In End Date",
+      "Manager Name",
+      "Manager Account",
+      "Manager Start Date",
+      "Manager End Date",
+      "Manager Position"
     ];
     inconsistencySheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   } else {
@@ -50,23 +59,49 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, 
 
   // Format the data for logging
   const issue = matchedManagers.length === 0 ? "No manager assigned" : "Multiple managers assigned";
-  const allInData = allInRow.join(" | ");
-  const managerDataStr = managerData.rows
-    .filter(row => row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.ACCOUNT)] === account)
-    .map(row => row.join(" | "))
-    .join("\n");
-
-  // Add the inconsistency record
-  const newRow = [
-    account,
-    monthDate.toISOString().split('T')[0],
-    issue,
-    allInData,
-    managerDataStr
-  ];
   
-  const lastRow = inconsistencySheet.getLastRow();
-  inconsistencySheet.getRange(lastRow + 1, 1, 1, newRow.length).setValues([newRow]);
+  // Get indices for All In data columns
+  const allInHeader = getSheetData(SHEET_NAMES.ALL_IN).header;
+  const monthIndex = findColumnIndex(allInHeader, COLUMN_NAMES.ALL_IN.MONTH);
+  const assignmentIdIndex = findColumnIndex(allInHeader, COLUMN_NAMES.ALL_IN.ASSIGNMENT_ID);
+  const nameIndex = findColumnIndex(allInHeader, COLUMN_NAMES.ALL_IN.NAME);
+  const accountIndex = findColumnIndex(allInHeader, COLUMN_NAMES.ALL_IN.ACCOUNT);
+  const startDateIndex = findColumnIndex(allInHeader, COLUMN_NAMES.ALL_IN.START_DATE);
+  const endDateIndex = findColumnIndex(allInHeader, COLUMN_NAMES.ALL_IN.END_DATE);
+
+  // Get indices for Manager data columns
+  const managerNameIndex = findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.NAME);
+  const managerAccountIndex = findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.ACCOUNT);
+  const managerStartDateIndex = findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.START_DATE);
+  const managerEndDateIndex = findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.END_DATE);
+  const managerPositionIndex = findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.POSITION);
+
+  // Get all matching manager rows
+  const matchingManagerRows = managerData.rows
+    .filter(row => row[managerAccountIndex] === account);
+
+  // For each matching manager row, create a separate inconsistency record
+  matchingManagerRows.forEach(managerRow => {
+    const newRow = [
+      account,
+      monthDate.toISOString().split('T')[0],
+      issue,
+      allInRow[monthIndex],
+      allInRow[assignmentIdIndex],
+      allInRow[nameIndex],
+      allInRow[accountIndex],
+      allInRow[startDateIndex],
+      allInRow[endDateIndex],
+      managerRow[managerNameIndex],
+      managerRow[managerAccountIndex],
+      managerRow[managerStartDateIndex],
+      managerRow[managerEndDateIndex],
+      managerRow[managerPositionIndex]
+    ];
+    
+    const lastRow = inconsistencySheet.getLastRow();
+    inconsistencySheet.getRange(lastRow + 1, 1, 1, newRow.length).setValues([newRow]);
+  });
 }
 
 function assignManagers() {

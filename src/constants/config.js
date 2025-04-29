@@ -11,12 +11,17 @@ const COLUMN_NAMES = {
   ALL_IN: {
     ACCOUNT: "Account",
     MONTH: "Month",
-    MANAGER: "MANAGER"
+    MANAGER: "MANAGER",
+    ASSIGNMENT_ID: "Assignment Id",
+    NAME: "Name",
+    START_DATE: "Start Date",
+    END_DATE: "End Date"
   },
   MANAGER: {
     ACCOUNT: "Account",
     START_DATE: "Start Date",
     END_DATE: "End Date",
-    NAME: "Name"
+    NAME: "Name",
+    POSITION: "Position name"
   }
 };
