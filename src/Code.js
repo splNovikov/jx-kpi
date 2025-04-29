@@ -16,6 +16,11 @@ function main() {
   addLastColumnTitle(SHEET_NAMES.ALL_IN, COLUMN_NAMES.ALL_IN.MANAGER);
   Logger.log('MANAGER column title added');
 
+  // Prepare inconsistency sheet
+  Logger.log('Preparing inconsistency sheet');
+  prepareInconsistencySheet();
+  Logger.log('Inconsistency sheet prepared');
+
   // Step 3: Run assignManagers
   Logger.log('Step 3: Starting manager assignment');
   assignManagers();

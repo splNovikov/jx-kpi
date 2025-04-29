@@ -20,11 +20,10 @@ function findManagersForAccount(account, monthDate, managerData) {
     .map(row => row[nameIndex]);
 }
 
-function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, managerData) {
+function prepareInconsistencySheet() {
   const sSheet = SpreadsheetApp.getActiveSpreadsheet();
   let inconsistencySheet = sSheet.getSheetByName(SHEET_NAMES.MANAGER_INCONSISTENCY);
   
-  // Create sheet if it doesn't exist
   if (!inconsistencySheet) {
     inconsistencySheet = sSheet.insertSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
     // Add headers
@@ -43,6 +42,11 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, 
       inconsistencySheet.getRange(2, 1, lastRow - 1, inconsistencySheet.getLastColumn()).clear();
     }
   }
+}
+
+function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, managerData) {
+  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
+  const inconsistencySheet = sSheet.getSheetByName(SHEET_NAMES.MANAGER_INCONSISTENCY);
 
   // Format the data for logging
   const issue = matchedManagers.length === 0 ? "No manager assigned" : "Multiple managers assigned";
