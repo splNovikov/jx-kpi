@@ -1,11 +1,11 @@
-export const SKIP_ACCOUNTS = ["", "Terminated", "Cost Exclusions", "Bench"];
+const SKIP_ACCOUNTS = ["", "Terminated", "Cost Exclusions", "Bench"];
 
-export const SHEET_NAMES = {
+const SHEET_NAMES = {
   ALL_IN: "[HARD Copy] all_in_reduced",
   MANAGER_ASSIGNMENTS: "Manager-Account assignments"
 };
 
-export const COLUMN_NAMES = {
+const COLUMN_NAMES = {
   ALL_IN: {
     ACCOUNT: "Account",
     MONTH: "Month",
@@ -17,4 +17,10 @@ export const COLUMN_NAMES = {
     END_DATE: "End Date",
     NAME: "Name"
   }
+};
+
+module.exports = {
+  SKIP_ACCOUNTS,
+  SHEET_NAMES,
+  COLUMN_NAMES
 }; 

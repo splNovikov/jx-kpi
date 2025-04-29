@@ -1,4 +1,4 @@
-import { assignManagers } from './services/managerAssignment.js';
+const { assignManagers } = require('./services/managerAssignment');
 
 function main() {
   assignManagers();

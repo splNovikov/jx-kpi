@@ -1,6 +1,6 @@
-import { SKIP_ACCOUNTS, SHEET_NAMES, COLUMN_NAMES } from '../constants/config.js';
-import { getSheetData, updateCellValue } from '../utils/spreadsheet.js';
-import { parseMonthString, isDateInRange } from '../utils/dateUtils.js';
+const { SKIP_ACCOUNTS, SHEET_NAMES, COLUMN_NAMES } = require('../constants/config');
+const { getSheetData, updateCellValue } = require('../utils/spreadsheet');
+const { parseMonthString, isDateInRange } = require('../utils/dateUtils');
 
 function findColumnIndex(header, columnName) {
   return header.indexOf(columnName);
@@ -24,7 +24,7 @@ function findManagersForAccount(account, monthDate, managerData) {
     .map(row => row[nameIndex]);
 }
 
-export function assignManagers() {
+function assignManagers() {
   const allInData = getSheetData(SHEET_NAMES.ALL_IN);
   const managerData = getSheetData(SHEET_NAMES.MANAGER_ASSIGNMENTS);
 
@@ -48,4 +48,8 @@ export function assignManagers() {
 
     updateCellValue(SHEET_NAMES.ALL_IN, i, managerIndex, managerValue);
   });
-} 
+}
+
+module.exports = {
+  assignManagers
+}; 
