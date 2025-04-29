@@ -1,6 +1,10 @@
 // Cache for sheet references
 const sheetCache = new Map();
 
+function clearSheetCache() {
+  sheetCache.clear();
+}
+
 function getSheet(sheetName) {
   if (!sheetCache.has(sheetName)) {
     const sSheet = SpreadsheetApp.getActiveSpreadsheet();
@@ -27,6 +31,7 @@ function updateCellValue(sheetName, rowIndex, columnIndex, value) {
 function clearTargetSheet(targetSheetName) {
   const targetSheet = getSheet(targetSheetName);
   targetSheet.clear();
+  clearSheetCache(); // Clear the cache after clearing the sheet
 }
 
 function copyDataToTargetSheet(targetSheetName, sourceSheetName) {

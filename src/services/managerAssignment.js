@@ -2,9 +2,6 @@
 let allInIndices = null;
 let managerIndices = null;
 
-// Cache for sheet references
-const sheetCache = new Map();
-
 function initializeColumnIndices() {
   const allInData = getSheetData(SHEET_NAMES.ALL_IN);
   const managerData = getSheetData(SHEET_NAMES.MANAGER_ASSIGNMENTS);
@@ -91,11 +88,8 @@ function findManagersForAccount(account, monthDate, managerData) {
 }
 
 function getSheet(sheetName) {
-  if (!sheetCache.has(sheetName)) {
-    const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-    sheetCache.set(sheetName, sSheet.getSheetByName(sheetName));
-  }
-  return sheetCache.get(sheetName);
+  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
+  return sSheet.getSheetByName(sheetName);
 }
 
 function prepareInconsistencySheet() {
@@ -104,10 +98,11 @@ function prepareInconsistencySheet() {
   if (!inconsistencySheet) {
     const sSheet = SpreadsheetApp.getActiveSpreadsheet();
     inconsistencySheet = sSheet.insertSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
-    sheetCache.set(SHEET_NAMES.MANAGER_INCONSISTENCY, inconsistencySheet);
+    clearSheetCache(); // Clear the cache after inserting a new sheet
   } else {
     // Clear existing data including headers
     inconsistencySheet.clear();
+    clearSheetCache(); // Clear the cache after clearing the sheet
   }
 
   // Add headers
