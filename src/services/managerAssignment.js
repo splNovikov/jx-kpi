@@ -40,7 +40,38 @@ function findColumnIndex(header, columnName) {
   return index;
 }
 
+function prepareManagerDataCache(managerData) {
+  const cache = new Map();
+  const indices = {
+    account: findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.ACCOUNT),
+    startDate: findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.START_DATE),
+    endDate: findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.END_DATE),
+    name: findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.NAME)
+  };
+
+  managerData.rows.forEach(row => {
+    const account = row[indices.account];
+    if (!cache.has(account)) {
+      cache.set(account, []);
+    }
+    cache.get(account).push(row);
+  });
+
+  return { cache, indices };
+}
+
 function findManagersForAccount(account, monthDate, managerData) {
+  // If we have cached data, use it
+  if (managerData.cache) {
+    const accountManagers = managerData.cache.get(account) || [];
+    return accountManagers.filter(managerRow => {
+      const startDate = new Date(managerRow[managerData.indices.startDate]);
+      const endDate = new Date(managerRow[managerData.indices.endDate]);
+      return isDateInRange(monthDate, startDate, endDate);
+    });
+  }
+
+  // Fallback to original implementation if no cache
   const {header, rows} = managerData;
   const accountIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.ACCOUNT);
   const startDateIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.START_DATE);
@@ -148,15 +179,10 @@ function assignManagers() {
   const monthIndex = findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MONTH);
   const managerIndex = findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MANAGER);
 
-  // Cache manager data for faster lookups
-  const managerDataCache = new Map();
-  managerData.rows.forEach(row => {
-    const account = row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.ACCOUNT)];
-    if (!managerDataCache.has(account)) {
-      managerDataCache.set(account, []);
-    }
-    managerDataCache.get(account).push(row);
-  });
+  // Prepare manager data with cache
+  const { cache, indices } = prepareManagerDataCache(managerData);
+  managerData.cache = cache;
+  managerData.indices = indices;
 
   // Prepare batch updates
   const updates = [];
@@ -171,16 +197,8 @@ function assignManagers() {
 
     const monthString = row[monthIndex];
     const monthDate = parseMonthString(monthString);
-
-    // Get managers from cache
-    const accountManagers = managerDataCache.get(account) || [];
-    const matchedManagers = accountManagers.filter(managerRow => {
-      const startDate = new Date(managerRow[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.START_DATE)]);
-      const endDate = new Date(managerRow[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.END_DATE)]);
-      return isDateInRange(monthDate, startDate, endDate);
-    });
-
-    const uniqueManagers = [...new Set(matchedManagers.map(row => row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.NAME)]))];
+    const matchedManagers = findManagersForAccount(account, monthDate, managerData);
+    const uniqueManagers = [...new Set(matchedManagers.map(row => row[managerData.indices.name]))];
     const managerValue = uniqueManagers.join(", ");
 
     updates.push([managerValue]);
