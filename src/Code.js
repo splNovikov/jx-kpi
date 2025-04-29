@@ -5,6 +5,9 @@ function main() {
   // Step 2: Make a hard copy of data from all_in_reduced to [HARD Copy] all_in_reduced
   copyDataToTargetSheet(SHEET_NAMES.ALL_IN, SHEET_NAMES.ALL_IN_SOURCE);
 
+  // Add MANAGER column title
+  addLastColumnTitle(SHEET_NAMES.ALL_IN, COLUMN_NAMES.ALL_IN.MANAGER);
+
   // Step 3: Run assignManagers
   assignManagers();
 }

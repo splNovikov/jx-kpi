@@ -15,16 +15,23 @@ function updateCellValue(sheetName, rowIndex, columnIndex, value) {
   sheet.getRange(rowIndex + 2, columnIndex + 1).setValue(value);
 }
 
-function clearTargetSheet(sheetName) {
+function clearTargetSheet(targetSheetName) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const targetSheet = ss.getSheetByName(sheetName);
+  const targetSheet = ss.getSheetByName(targetSheetName);
   targetSheet.clear();
 }
 
-function copyDataToTargetSheet(target, source) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const targetSheet = ss.getSheetByName(target);
-  const sourceSheet = ss.getSheetByName(source);
+function copyDataToTargetSheet(targetSheetName, sourceSheetName) {
+
+  const targetSheet = ss.getSheetByName(targetSheetName);
+  const sourceSheet = ss.getSheetByName(sourceSheetName);
   const sourceData = sourceSheet.getDataRange().getValues();
   targetSheet.getRange(1, 1, sourceData.length, sourceData[0].length).setValues(sourceData);
+}
+
+function addLastColumnTitle(targetSheetName, title) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const targetSheet = ss.getSheetByName(targetSheetName);
+  const lastColumn = targetSheet.getLastColumn();
+  targetSheet.getRange(1, lastColumn + 1).setValue(title);
 }
