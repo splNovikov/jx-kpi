@@ -26,31 +26,29 @@ function prepareInconsistencySheet() {
   
   if (!inconsistencySheet) {
     inconsistencySheet = sSheet.insertSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
-    // Add headers
-    const headers = [
-      COLUMN_NAMES.ALL_IN.ACCOUNT,
-      COLUMN_NAMES.ALL_IN.MONTH,
-      "Issue",
-      COLUMN_NAMES.ALL_IN.MONTH,
-      COLUMN_NAMES.ALL_IN.ASSIGNMENT_ID,
-      COLUMN_NAMES.ALL_IN.NAME,
-      COLUMN_NAMES.ALL_IN.ACCOUNT,
-      COLUMN_NAMES.ALL_IN.START_DATE,
-      COLUMN_NAMES.ALL_IN.END_DATE,
-      COLUMN_NAMES.MANAGER.NAME,
-      COLUMN_NAMES.MANAGER.ACCOUNT,
-      COLUMN_NAMES.MANAGER.START_DATE,
-      COLUMN_NAMES.MANAGER.END_DATE,
-      COLUMN_NAMES.MANAGER.POSITION
-    ];
-    inconsistencySheet.getRange(1, 1, 1, headers.length).setValues([headers]);
   } else {
-    // Clear existing data except headers
-    const lastRow = inconsistencySheet.getLastRow();
-    if (lastRow > 1) {
-      inconsistencySheet.getRange(2, 1, lastRow - 1, inconsistencySheet.getLastColumn()).clear();
-    }
+    // Clear existing data including headers
+    inconsistencySheet.clear();
   }
+
+  // Add headers
+  const headers = [
+    COLUMN_NAMES.ALL_IN.ACCOUNT,
+    COLUMN_NAMES.ALL_IN.MONTH,
+    "Issue",
+    COLUMN_NAMES.ALL_IN.MONTH,
+    COLUMN_NAMES.ALL_IN.ASSIGNMENT_ID,
+    COLUMN_NAMES.ALL_IN.NAME,
+    COLUMN_NAMES.ALL_IN.ACCOUNT,
+    COLUMN_NAMES.ALL_IN.START_DATE,
+    COLUMN_NAMES.ALL_IN.END_DATE,
+    COLUMN_NAMES.MANAGER.NAME,
+    COLUMN_NAMES.MANAGER.ACCOUNT,
+    COLUMN_NAMES.MANAGER.START_DATE,
+    COLUMN_NAMES.MANAGER.END_DATE,
+    COLUMN_NAMES.MANAGER.POSITION
+  ];
+  inconsistencySheet.getRange(1, 1, 1, headers.length).setValues([headers]);
 }
 
 function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, managerData) {
