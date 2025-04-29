@@ -15,7 +15,8 @@ function updateCellValue(sheetName, rowIndex, columnIndex, value) {
   sheet.getRange(rowIndex + 2, columnIndex + 1).setValue(value);
 }
 
-module.exports = {
+// Export as global functions
+Object.assign(this, {
   getSheetData,
   updateCellValue
-};
+});

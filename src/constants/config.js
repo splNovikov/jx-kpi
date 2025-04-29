@@ -19,8 +19,9 @@ const COLUMN_NAMES = {
   }
 };
 
-module.exports = {
+// Export as global variables
+Object.assign(this, {
   SKIP_ACCOUNTS,
   SHEET_NAMES,
   COLUMN_NAMES
-}; 
+}); 

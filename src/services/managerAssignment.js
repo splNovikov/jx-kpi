@@ -50,6 +50,7 @@ function assignManagers() {
   });
 }
 
-module.exports = {
+// Export as global function
+Object.assign(this, {
   assignManagers
-}; 
+}); 

@@ -6,7 +6,8 @@ function isDateInRange(date, startDate, endDate) {
   return date >= startDate && date <= endDate;
 }
 
-module.exports = {
+// Export as global functions
+Object.assign(this, {
   parseMonthString,
   isDateInRange
-}; 
+}); 
