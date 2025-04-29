@@ -1,5 +1,4 @@
-const { assignManagers } = require('./services/managerAssignment');
-
 function main() {
+  const { assignManagers } = require('./services/managerAssignment');
   assignManagers();
 }
