@@ -14,3 +14,17 @@ function updateCellValue(sheetName, rowIndex, columnIndex, value) {
   const sheet = ss.getSheetByName(sheetName);
   sheet.getRange(rowIndex + 2, columnIndex + 1).setValue(value);
 }
+
+function clearTargetSheet(sheetName) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const targetSheet = ss.getSheetByName(sheetName);
+  targetSheet.clear();
+}
+
+function copyDataToTargetSheet(target, source) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const targetSheet = ss.getSheetByName(target);
+  const sourceSheet = ss.getSheetByName(source);
+  const sourceData = sourceSheet.getDataRange().getValues();
+  targetSheet.getRange(1, 1, sourceData.length, sourceData[0].length).setValues(sourceData);
+}
