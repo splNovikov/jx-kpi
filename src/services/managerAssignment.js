@@ -261,31 +261,53 @@ function findOverlappingAssignments() {
     // Skip if less than 2 assignments
     if (assignments.length < 2) continue;
 
-    // Compare each pair of assignments
+    // Group assignments by manager name
+    const assignmentsByManager = new Map();
+    assignments.forEach(assignment => {
+      const managerName = assignment[indices.name];
+      if (!assignmentsByManager.has(managerName)) {
+        assignmentsByManager.set(managerName, []);
+      }
+      assignmentsByManager.get(managerName).push(assignment);
+    });
+
+    // Skip if only one manager
+    if (assignmentsByManager.size < 2) continue;
+
+    // Check for overlaps between different managers
     let hasOverlap = false;
-    for (let i = 0; i < assignments.length - 1; i++) {
-      for (let j = i + 1; j < assignments.length; j++) {
-        const assignment1 = assignments[i];
-        const assignment2 = assignments[j];
+    const overlappingAssignments = new Set();
 
-        const start1 = new Date(assignment1[indices.startDate]);
-        const end1 = new Date(assignment1[indices.endDate]);
-        const start2 = new Date(assignment2[indices.startDate]);
-        const end2 = new Date(assignment2[indices.endDate]);
+    // Compare assignments between different managers
+    const managers = Array.from(assignmentsByManager.keys());
+    for (let i = 0; i < managers.length - 1; i++) {
+      for (let j = i + 1; j < managers.length; j++) {
+        const manager1Assignments = assignmentsByManager.get(managers[i]);
+        const manager2Assignments = assignmentsByManager.get(managers[j]);
 
-        // Check for overlap
-        if (start1 <= end2 && start2 <= end1) {
-          hasOverlap = true;
-          break;
+        // Check each pair of assignments between the two managers
+        for (const assignment1 of manager1Assignments) {
+          for (const assignment2 of manager2Assignments) {
+            const start1 = new Date(assignment1[indices.startDate]);
+            const end1 = new Date(assignment1[indices.endDate]);
+            const start2 = new Date(assignment2[indices.startDate]);
+            const end2 = new Date(assignment2[indices.endDate]);
+
+            // Check for overlap
+            if (start1 <= end2 && start2 <= end1) {
+              hasOverlap = true;
+              overlappingAssignments.add(assignment1);
+              overlappingAssignments.add(assignment2);
+            }
+          }
         }
       }
-      if (hasOverlap) break;
     }
 
-    // If this account has any overlaps, add all its assignments
+    // If we found overlaps, add all overlapping assignments
     if (hasOverlap) {
-      // Add all assignments for this account
-      assignments.forEach(assignment => {
+      // Add all overlapping assignments
+      Array.from(overlappingAssignments).forEach(assignment => {
         overlaps.push([
           assignment[indices.name],
           account,
