@@ -23,7 +23,7 @@ function findManagersForAccount(account, monthDate, managerData) {
 function prepareInconsistencySheet() {
   const sSheet = SpreadsheetApp.getActiveSpreadsheet();
   let inconsistencySheet = sSheet.getSheetByName(SHEET_NAMES.MANAGER_INCONSISTENCY);
-  
+
   if (!inconsistencySheet) {
     inconsistencySheet = sSheet.insertSheet(SHEET_NAMES.MANAGER_INCONSISTENCY);
   } else {
@@ -33,8 +33,6 @@ function prepareInconsistencySheet() {
 
   // Add headers
   const headers = [
-    COLUMN_NAMES.ALL_IN.ACCOUNT,
-    COLUMN_NAMES.ALL_IN.MONTH,
     "Issue",
     COLUMN_NAMES.ALL_IN.MONTH,
     COLUMN_NAMES.ALL_IN.ASSIGNMENT_ID,
@@ -57,7 +55,7 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, 
 
   // Format the data for logging
   const issue = matchedManagers.length === 0 ? "No manager assigned" : "Multiple managers assigned";
-  
+
   // Get indices for All In data columns
   const allInHeader = getSheetData(SHEET_NAMES.ALL_IN).header;
   const monthIndex = findColumnIndex(allInHeader, COLUMN_NAMES.ALL_IN.MONTH);
@@ -81,8 +79,6 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, 
   // For each matching manager row, create a separate inconsistency record
   matchingManagerRows.forEach(managerRow => {
     const newRow = [
-      account,
-      monthDate.toISOString().split('T')[0],
       issue,
       allInRow[monthIndex],
       allInRow[assignmentIdIndex],
@@ -96,7 +92,7 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, 
       managerRow[managerEndDateIndex],
       managerRow[managerPositionIndex]
     ];
-    
+
     const lastRow = inconsistencySheet.getLastRow();
     inconsistencySheet.getRange(lastRow + 1, 1, 1, newRow.length).setValues([newRow]);
   });
