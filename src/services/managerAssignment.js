@@ -7,7 +7,6 @@ function findManagersForAccount(account, monthDate, managerData) {
   const accountIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.ACCOUNT);
   const startDateIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.START_DATE);
   const endDateIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.END_DATE);
-  const nameIndex = findColumnIndex(header, COLUMN_NAMES.MANAGER.NAME);
 
   return rows
     .filter(row => {
@@ -16,8 +15,7 @@ function findManagersForAccount(account, monthDate, managerData) {
       const endDate = new Date(row[endDateIndex]);
 
       return account === managerAccount && isDateInRange(monthDate, startDate, endDate);
-    })
-    .map(row => row[nameIndex]);
+    });
 }
 
 function prepareInconsistencySheet() {
@@ -72,12 +70,8 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow, 
   const managerEndDateIndex = findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.END_DATE);
   const managerPositionIndex = findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.POSITION);
 
-  // Get all matching manager rows
-  const matchingManagerRows = managerData.rows
-    .filter(row => row[managerAccountIndex] === account);
-
-  // For each matching manager row, create a separate inconsistency record
-  matchingManagerRows.forEach(managerRow => {
+  // For each matched manager, create a separate inconsistency record
+  matchedManagers.forEach(managerRow => {
     const newRow = [
       issue,
       allInRow[monthIndex],
@@ -117,7 +111,7 @@ function assignManagers() {
     const monthString = row[monthIndex];
     const monthDate = parseMonthString(monthString);
     const matchedManagers = findManagersForAccount(account, monthDate, managerData);
-    const uniqueManagers = [...new Set(matchedManagers)];
+    const uniqueManagers = [...new Set(matchedManagers.map(row => row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.NAME)]))];
     const managerValue = uniqueManagers.join(", ");
 
     // Check for inconsistencies
