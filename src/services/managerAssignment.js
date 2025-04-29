@@ -148,9 +148,6 @@ function assignManagers() {
   const monthIndex = findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MONTH);
   const managerIndex = findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MANAGER);
 
-  // Prepare batch updates
-  const updates = [];
-
   // Cache manager data for faster lookups
   const managerDataCache = new Map();
   managerData.rows.forEach(row => {
@@ -161,11 +158,14 @@ function assignManagers() {
     managerDataCache.get(account).push(row);
   });
 
-  allInData.rows.forEach((row, i) => {
+  // Prepare batch updates
+  const updates = [];
+
+  allInData.rows.forEach((row) => {
     const account = row[accountIndex];
 
     if (SKIP_ACCOUNTS.includes(account)) {
-      updates.push({ row: i, value: "" });
+      updates.push([""]);
       return;
     }
 
@@ -183,7 +183,7 @@ function assignManagers() {
     const uniqueManagers = [...new Set(matchedManagers.map(row => row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.NAME)]))];
     const managerValue = uniqueManagers.join(", ");
 
-    updates.push({ row: i, value: managerValue });
+    updates.push([managerValue]);
 
     // Check for inconsistencies
     if (matchedManagers.length !== 1) {
@@ -195,7 +195,6 @@ function assignManagers() {
   // Batch update all cells at once
   const sSheet = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = sSheet.getSheetByName(SHEET_NAMES.ALL_IN);
-  const values = updates.map(update => [update.value]);
-  const range = sheet.getRange(2, managerIndex + 1, values.length, 1);
-  range.setValues(values);
+  const range = sheet.getRange(2, managerIndex + 1, updates.length, 1);
+  range.setValues(updates);
 }
