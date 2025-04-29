@@ -1,6 +1,16 @@
+// Cache for sheet references
+const sheetCache = new Map();
+
+function getSheet(sheetName) {
+  if (!sheetCache.has(sheetName)) {
+    const sSheet = SpreadsheetApp.getActiveSpreadsheet();
+    sheetCache.set(sheetName, sSheet.getSheetByName(sheetName));
+  }
+  return sheetCache.get(sheetName);
+}
+
 function getSheetData(sheetName) {
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = sSheet.getSheetByName(sheetName);
+  const sheet = getSheet(sheetName);
   const data = sheet.getDataRange().getValues();
 
   return {
@@ -10,28 +20,24 @@ function getSheetData(sheetName) {
 }
 
 function updateCellValue(sheetName, rowIndex, columnIndex, value) {
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = sSheet.getSheetByName(sheetName);
+  const sheet = getSheet(sheetName);
   sheet.getRange(rowIndex + 2, columnIndex + 1).setValue(value);
 }
 
 function clearTargetSheet(targetSheetName) {
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const targetSheet = sSheet.getSheetByName(targetSheetName);
+  const targetSheet = getSheet(targetSheetName);
   targetSheet.clear();
 }
 
 function copyDataToTargetSheet(targetSheetName, sourceSheetName) {
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const targetSheet = sSheet.getSheetByName(targetSheetName);
-  const sourceSheet = sSheet.getSheetByName(sourceSheetName);
+  const targetSheet = getSheet(targetSheetName);
+  const sourceSheet = getSheet(sourceSheetName);
   const sourceData = sourceSheet.getDataRange().getValues();
   targetSheet.getRange(1, 1, sourceData.length, sourceData[0].length).setValues(sourceData);
 }
 
 function addLastColumnTitle(targetSheetName, title) {
-  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
-  const targetSheet = sSheet.getSheetByName(targetSheetName);
+  const targetSheet = getSheet(targetSheetName);
   const lastColumn = targetSheet.getLastColumn();
   targetSheet.getRange(1, lastColumn + 1).setValue(title);
 }

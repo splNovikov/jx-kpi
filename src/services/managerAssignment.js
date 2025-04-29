@@ -99,47 +99,42 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow) 
     return;
   }
 
-  // Check if this is a new assignment ID and add blank row if needed
+  // Prepare all rows to be added
+  const newRows = matchedManagers.map(managerRow => [
+    issue,
+    allInRow[allInIndices.month],
+    currentAssignmentId,
+    allInRow[allInIndices.name],
+    allInRow[allInIndices.account],
+    allInRow[allInIndices.startDate],
+    allInRow[allInIndices.endDate],
+    managerRow[managerIndices.name],
+    managerRow[managerIndices.account],
+    managerRow[managerIndices.startDate],
+    managerRow[managerIndices.endDate],
+    managerRow[managerIndices.position]
+  ]);
+
+  // Get the current last row
   const lastRow = inconsistencySheet.getLastRow();
 
-  if (lastRow > 1) { // Skip header row
+  // Add blank row if needed
+  if (lastRow > 1) {
     const lastRowData = inconsistencySheet.getRange(lastRow, 1, 1, 12).getValues()[0];
-    const lastAssignmentId = lastRowData[2]; // Assignment ID is in column 3
-    
-    // Skip blank row check if the last row is a blank row (all cells are spaces)
+    const lastAssignmentId = lastRowData[2];
     const isBlankRow = lastRowData.every(cell => cell === " ");
+    
     if (!isBlankRow && lastAssignmentId !== currentAssignmentId) {
-      // Add blank row with a single space to ensure it's actually added
       const blankRow = Array(12).fill(" ");
       inconsistencySheet.getRange(lastRow + 1, 1, 1, 12).setValues([blankRow]);
-      // Force a refresh of the sheet
-      SpreadsheetApp.flush();
     }
   }
 
-  // For each matched manager, create a separate inconsistency record
-  matchedManagers.forEach(managerRow => {
-    const newRow = [
-      issue,
-      allInRow[allInIndices.month],
-      currentAssignmentId,
-      allInRow[allInIndices.name],
-      allInRow[allInIndices.account],
-      allInRow[allInIndices.startDate],
-      allInRow[allInIndices.endDate],
-      managerRow[managerIndices.name],
-      managerRow[managerIndices.account],
-      managerRow[managerIndices.startDate],
-      managerRow[managerIndices.endDate],
-      managerRow[managerIndices.position]
-    ];
-
-    // Get the current last row (which might have changed if we added a blank row)
-    const currentLastRow = inconsistencySheet.getLastRow();
-    inconsistencySheet.getRange(currentLastRow + 1, 1, 1, newRow.length).setValues([newRow]);
-    // Force a refresh of the sheet
-    SpreadsheetApp.flush();
-  });
+  // Batch update all new rows
+  const currentLastRow = inconsistencySheet.getLastRow();
+  if (newRows.length > 0) {
+    inconsistencySheet.getRange(currentLastRow + 1, 1, newRows.length, newRows[0].length).setValues(newRows);
+  }
 }
 
 function assignManagers() {
@@ -153,11 +148,15 @@ function assignManagers() {
   const monthIndex = findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MONTH);
   const managerIndex = findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MANAGER);
 
+  // Prepare batch updates
+  const updates = [];
+  const inconsistencyRecords = [];
+
   allInData.rows.forEach((row, i) => {
     const account = row[accountIndex];
 
     if (SKIP_ACCOUNTS.includes(account)) {
-      updateCellValue(SHEET_NAMES.ALL_IN, i, managerIndex, "");
+      updates.push({ row: i, value: "" });
       return;
     }
 
@@ -167,11 +166,23 @@ function assignManagers() {
     const uniqueManagers = [...new Set(matchedManagers.map(row => row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.NAME)]))];
     const managerValue = uniqueManagers.join(", ");
 
+    updates.push({ row: i, value: managerValue });
+
     // Check for inconsistencies
     if (matchedManagers.length !== 1) {
-      logManagerInconsistency(account, monthDate, matchedManagers, row);
+      inconsistencyRecords.push({ account, monthDate, matchedManagers, allInRow: row });
     }
+  });
 
-    updateCellValue(SHEET_NAMES.ALL_IN, i, managerIndex, managerValue);
+  // Batch update all cells at once
+  const sSheet = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = sSheet.getSheetByName(SHEET_NAMES.ALL_IN);
+  const values = updates.map(update => [update.value]);
+  const range = sheet.getRange(2, managerIndex + 1, values.length, 1);
+  range.setValues(values);
+
+  // Process inconsistencies
+  inconsistencyRecords.forEach(record => {
+    logManagerInconsistency(record.account, record.monthDate, record.matchedManagers, record.allInRow);
   });
 }
