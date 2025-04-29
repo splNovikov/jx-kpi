@@ -99,6 +99,21 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow) 
     return;
   }
 
+  // Get the current last row
+  const lastRow = inconsistencySheet.getLastRow();
+
+  // Add blank row if needed
+  if (lastRow > 1) {
+    const lastRowData = inconsistencySheet.getRange(lastRow, 1, 1, 12).getValues()[0];
+    const lastAssignmentId = lastRowData[2];
+    const isBlankRow = lastRowData.every(cell => cell === " ");
+
+    if (!isBlankRow && lastAssignmentId !== currentAssignmentId) {
+      const blankRow = Array(12).fill(" ");
+      inconsistencySheet.getRange(lastRow + 1, 1, 1, 12).setValues([blankRow]);
+    }
+  }
+
   // Prepare all rows to be added
   const newRows = matchedManagers.map(managerRow => [
     issue,
@@ -114,21 +129,6 @@ function logManagerInconsistency(account, monthDate, matchedManagers, allInRow) 
     managerRow[managerIndices.endDate],
     managerRow[managerIndices.position]
   ]);
-
-  // Get the current last row
-  const lastRow = inconsistencySheet.getLastRow();
-
-  // Add blank row if needed
-  if (lastRow > 1) {
-    const lastRowData = inconsistencySheet.getRange(lastRow, 1, 1, 12).getValues()[0];
-    const lastAssignmentId = lastRowData[2];
-    const isBlankRow = lastRowData.every(cell => cell === " ");
-    
-    if (!isBlankRow && lastAssignmentId !== currentAssignmentId) {
-      const blankRow = Array(12).fill(" ");
-      inconsistencySheet.getRange(lastRow + 1, 1, 1, 12).setValues([blankRow]);
-    }
-  }
 
   // Batch update all new rows
   const currentLastRow = inconsistencySheet.getLastRow();
@@ -150,7 +150,16 @@ function assignManagers() {
 
   // Prepare batch updates
   const updates = [];
-  const inconsistencyRecords = [];
+
+  // Cache manager data for faster lookups
+  const managerDataCache = new Map();
+  managerData.rows.forEach(row => {
+    const account = row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.ACCOUNT)];
+    if (!managerDataCache.has(account)) {
+      managerDataCache.set(account, []);
+    }
+    managerDataCache.get(account).push(row);
+  });
 
   allInData.rows.forEach((row, i) => {
     const account = row[accountIndex];
@@ -162,7 +171,15 @@ function assignManagers() {
 
     const monthString = row[monthIndex];
     const monthDate = parseMonthString(monthString);
-    const matchedManagers = findManagersForAccount(account, monthDate, managerData);
+
+    // Get managers from cache
+    const accountManagers = managerDataCache.get(account) || [];
+    const matchedManagers = accountManagers.filter(managerRow => {
+      const startDate = new Date(managerRow[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.START_DATE)]);
+      const endDate = new Date(managerRow[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.END_DATE)]);
+      return isDateInRange(monthDate, startDate, endDate);
+    });
+
     const uniqueManagers = [...new Set(matchedManagers.map(row => row[findColumnIndex(managerData.header, COLUMN_NAMES.MANAGER.NAME)]))];
     const managerValue = uniqueManagers.join(", ");
 
@@ -170,7 +187,8 @@ function assignManagers() {
 
     // Check for inconsistencies
     if (matchedManagers.length !== 1) {
-      inconsistencyRecords.push({ account, monthDate, matchedManagers, allInRow: row });
+      // Log each inconsistency immediately to ensure proper ordering
+      logManagerInconsistency(account, monthDate, matchedManagers, row);
     }
   });
 
@@ -180,9 +198,4 @@ function assignManagers() {
   const values = updates.map(update => [update.value]);
   const range = sheet.getRange(2, managerIndex + 1, values.length, 1);
   range.setValues(values);
-
-  // Process inconsistencies
-  inconsistencyRecords.forEach(record => {
-    logManagerInconsistency(record.account, record.monthDate, record.matchedManagers, record.allInRow);
-  });
 }
