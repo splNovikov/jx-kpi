@@ -1,1 +1,3 @@
-assignManagers();
+function main() {
+  assignManagers();
+}
