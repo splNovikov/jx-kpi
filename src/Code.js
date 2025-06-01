@@ -1,6 +1,6 @@
 function main() {
   Logger.log('Starting main function execution');
-  
+
   // Step 1: Clear [HARD Copy] all_in_reduced
   Logger.log('Step 1: Clearing target sheet');
   clearTargetSheet(SHEET_NAMES.ALL_IN);
@@ -17,9 +17,9 @@ function main() {
   Logger.log('MANAGER column title added');
 
   // Prepare inconsistency sheet
-  Logger.log('Preparing inconsistency sheet');
-  prepareInconsistencySheet();
-  Logger.log('Inconsistency sheet prepared');
+  // Logger.log('Preparing inconsistency sheet');
+  // prepareInconsistencySheet();
+  // Logger.log('Inconsistency sheet prepared');
 
   // Step 3: Run assignManagers
   Logger.log('Step 3: Starting manager assignment');
@@ -27,9 +27,9 @@ function main() {
   Logger.log('Step 3 completed: Managers assigned');
 
   // Step 4: Find overlapping assignments
-  Logger.log('Step 4: Finding overlapping assignments');
-  findOverlappingAssignments();
-  Logger.log('Step 4 completed: Overlapping assignments found');
+  // Logger.log('Step 4: Finding overlapping assignments');
+  // findOverlappingAssignments();
+  // Logger.log('Step 4 completed: Overlapping assignments found');
 
   Logger.log('Main function execution completed successfully');
 }
