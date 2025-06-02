@@ -32,5 +32,6 @@ const SPECIAL_ACCOUNT_MANAGERS = {
   "Bench": "Bench-MANAGER",
   "Department: Engineering": "Department: Engineering-MANAGER",
   "Department: Delivery": "Department: Delivery-MANAGER",
-  "Department: Operations": "Department: Operations-MANAGER"
+  "Department: Operations": "Department: Operations-MANAGER",
+  "Department: HR": "Department: HR-MANAGER"
 };
