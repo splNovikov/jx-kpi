@@ -196,6 +196,12 @@ function assignManagers() {
   allInData.rows.forEach((row) => {
     const account = row[accountIndex];
 
+    // Check for special account mapping first
+    if (SPECIAL_ACCOUNT_MANAGERS[account]) {
+      updates.push([SPECIAL_ACCOUNT_MANAGERS[account]]);
+      return;
+    }
+
     if (SKIP_ACCOUNTS.includes(account)) {
       updates.push([""]);
       return;

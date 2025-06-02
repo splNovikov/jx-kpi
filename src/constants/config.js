@@ -1,4 +1,4 @@
-const SKIP_ACCOUNTS = ["", "Terminated", "Cost Exclusions", "Bench"];
+const SKIP_ACCOUNTS = ["", "Terminated", "Cost Exclusions"];
 
 const SHEET_NAMES = {
   ALL_IN: "[HARD Copy] all_in_reduced",
@@ -25,4 +25,12 @@ const COLUMN_NAMES = {
     NAME: "Name",
     POSITION: "Position name"
   }
+};
+
+// Special mapping for accounts that never had a manager
+const SPECIAL_ACCOUNT_MANAGERS = {
+  "Bench": "Bench-MANAGER",
+  "Department: Engineering": "Department: Engineering-MANAGER",
+  "Department: Delivery": "Department: Delivery-MANAGER",
+  "Department: Operations": "Department: Operations-MANAGER"
 };
