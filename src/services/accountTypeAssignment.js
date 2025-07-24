@@ -1,14 +1,14 @@
-// Module-level variables for storing column indices
-let allInIndices = null;
+// Module-level variables for storing column indices (prefixed to avoid conflicts)
+let accountTypeAllInIndices = null;
 let accountBillabilityIndices = null;
 
 function initializeAccountTypeColumnIndices() {
   const allInData = getSheetData(SHEET_NAMES.ALL_IN);
   const accountBillabilityData = getSheetData(SHEET_NAMES.ACCOUNT_BILLABILITY_TYPES);
 
-  allInIndices = {
-    account: findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT),
-    accountType: findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT_TYPE)
+  accountTypeAllInIndices = {
+    account: findAccountTypeColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT),
+    accountType: findAccountTypeColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT_TYPE)
   };
 
   // Build indices for all columns in Account Billability Types sheet
@@ -22,7 +22,7 @@ function initializeAccountTypeColumnIndices() {
   Logger.log(`Account Billability Types columns found: ${JSON.stringify(Object.keys(accountBillabilityIndices))}`);
 }
 
-function findColumnIndex(header, columnName) {
+function findAccountTypeColumnIndex(header, columnName) {
   if (!header) {
     Logger.log(`Error: Header is undefined when looking for column: ${columnName}`);
     return -1;
@@ -100,7 +100,7 @@ function assignAccountTypes() {
   const updates = [];
 
   allInData.rows.forEach((row, index) => {
-    const account = row[allInIndices.account];
+    const account = row[accountTypeAllInIndices.account];
     
     // Skip if account is in skip list
     if (SKIP_ACCOUNTS.includes(account)) {
@@ -114,7 +114,7 @@ function assignAccountTypes() {
 
   // Batch update all cells at once
   const allInSheet = getSheet(SHEET_NAMES.ALL_IN);
-  const range = allInSheet.getRange(2, allInIndices.accountType + 1, updates.length, 1);
+  const range = allInSheet.getRange(2, accountTypeAllInIndices.accountType + 1, updates.length, 1);
   range.setValues(updates);
 
   Logger.log(`Account type assignment completed. Updated ${updates.length} rows`);
