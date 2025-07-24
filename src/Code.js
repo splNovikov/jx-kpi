@@ -26,10 +26,20 @@ function main() {
   assignManagers();
   Logger.log('Step 3 completed: Managers assigned');
 
-  // Step 4: Find overlapping assignments
-  // Logger.log('Step 4: Finding overlapping assignments');
+  // Add ACCOUNT TYPE column title
+  Logger.log('Adding ACCOUNT TYPE column title');
+  addLastColumnTitle(SHEET_NAMES.ALL_IN, COLUMN_NAMES.ALL_IN.ACCOUNT_TYPE);
+  Logger.log('ACCOUNT TYPE column title added');
+
+  // Step 4: Run assignAccountTypes
+  Logger.log('Step 4: Starting account type assignment');
+  assignAccountTypes();
+  Logger.log('Step 4 completed: Account types assigned');
+
+  // Step 5: Find overlapping assignments
+  // Logger.log('Step 5: Finding overlapping assignments');
   // findOverlappingAssignments();
-  // Logger.log('Step 4 completed: Overlapping assignments found');
+  // Logger.log('Step 5 completed: Overlapping assignments found');
 
   Logger.log('Main function execution completed successfully');
 }

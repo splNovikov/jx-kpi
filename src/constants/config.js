@@ -5,7 +5,8 @@ const SHEET_NAMES = {
   ALL_IN_SOURCE: "all_in_reduced",
   MANAGER_ASSIGNMENTS: "Manager-Account assignments",
   MANAGER_INCONSISTENCY: "Manager assignment inconsistency",
-  MANAGER_OVERLAPS: "Manager-Account assignments overlap"
+  MANAGER_OVERLAPS: "Manager-Account assignments overlap",
+  ACCOUNT_BILLABILITY_TYPES: "Account Billability Types"
 };
 
 const COLUMN_NAMES = {
@@ -13,6 +14,7 @@ const COLUMN_NAMES = {
     ACCOUNT: "Account",
     MONTH: "Month",
     MANAGER: "MANAGER",
+    ACCOUNT_TYPE: "Account Type",
     ASSIGNMENT_ID: "Assignment Id",
     NAME: "Name",
     START_DATE: "Start Date",
@@ -24,6 +26,11 @@ const COLUMN_NAMES = {
     END_DATE: "End Date",
     NAME: "Name",
     POSITION: "Position name"
+  },
+  ACCOUNT_BILLABILITY: {
+    PAYED: "Payed",
+    INTERNAL_DEV: "Internal Dev",
+    DEPARTMENTS: "Departments"
   }
 };
 
