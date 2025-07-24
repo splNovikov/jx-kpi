@@ -83,7 +83,7 @@ function findAccountTypeForAccount(account, accountBillabilityCache) {
 
 function assignAccountTypes() {
   Logger.log('Starting account type assignment');
-
+  
   // Initialize indices before processing
   initializeAccountTypeColumnIndices();
 
@@ -98,7 +98,7 @@ function assignAccountTypes() {
 
   allInData.rows.forEach((row, index) => {
     const account = row[accountTypeAllInIndices.account];
-
+    
     // Skip if account is in skip list
     if (SKIP_ACCOUNTS.includes(account)) {
       updates.push(['']);
@@ -115,4 +115,34 @@ function assignAccountTypes() {
   range.setValues(updates);
 
   Logger.log(`Account type assignment completed. Updated ${updates.length} rows`);
+}
+
+// Optimized version that works with cached data and returns results for batch operations
+function assignAccountTypesOptimized(dataManager) {
+  Logger.log('Starting optimized account type assignment');
+  
+  const allInData = dataManager.getCachedData('ALL_IN');
+  const accountBillabilityCacheData = dataManager.getAccountBillabilityCache();
+  
+  const accountIndex = dataManager.findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT);
+
+  // Prepare results array
+  const results = [];
+
+  allInData.rows.forEach((row) => {
+    const account = row[accountIndex];
+    
+    // Skip if account is in skip list
+    if (SKIP_ACCOUNTS.includes(account)) {
+      results.push(['']);
+      return;
+    }
+
+    // Find account type using cached data
+    const accountType = findAccountTypeForAccount(account, accountBillabilityCacheData.cache);
+    results.push([accountType]);
+  });
+
+  Logger.log(`Optimized account type assignment completed. Processed ${results.length} rows`);
+  return results;
 }

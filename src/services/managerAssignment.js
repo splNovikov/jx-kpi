@@ -228,6 +228,54 @@ function assignManagers() {
   range.setValues(updates);
 }
 
+// Optimized version that works with cached data and returns results for batch operations
+function assignManagersOptimized(dataManager) {
+  Logger.log('Starting optimized manager assignment');
+  
+  const allInData = dataManager.getCachedData('ALL_IN');
+  const managerCacheData = dataManager.getManagerCache();
+  
+  const accountIndex = dataManager.findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT);
+  const monthIndex = dataManager.findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MONTH);
+
+  // Prepare results array
+  const results = [];
+
+  allInData.rows.forEach((row) => {
+    const account = row[accountIndex];
+
+    // Check for special account mapping first
+    if (SPECIAL_ACCOUNT_MANAGERS[account]) {
+      results.push([SPECIAL_ACCOUNT_MANAGERS[account]]);
+      return;
+    }
+
+    if (SKIP_ACCOUNTS.includes(account)) {
+      results.push(['']);
+      return;
+    }
+
+    const monthString = row[monthIndex];
+    const monthDate = parseMonthString(monthString);
+    
+    // Use cached manager data
+    const accountManagers = managerCacheData.cache.get(account) || [];
+    const matchedManagers = accountManagers.filter(managerRow => {
+      const startDate = new Date(managerRow[managerCacheData.indices.startDate]);
+      const endDate = new Date(managerRow[managerCacheData.indices.endDate]);
+      return isDateInRange(monthDate, startDate, endDate);
+    });
+
+    const uniqueManagers = [...new Set(matchedManagers.map(row => row[managerCacheData.indices.name]))];
+    const managerValue = uniqueManagers.join(", ");
+
+    results.push([managerValue]);
+  });
+
+  Logger.log(`Optimized manager assignment completed. Processed ${results.length} rows`);
+  return results;
+}
+
 function prepareOverlapSheet() {
   let overlapSheet = getSheet(SHEET_NAMES.MANAGER_OVERLAPS);
 

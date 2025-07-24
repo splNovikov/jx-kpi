@@ -4,6 +4,7 @@ function main() {
   // Step 1: Clear [HARD Copy] all_in_reduced
   Logger.log('Step 1: Clearing target sheet');
   clearTargetSheet(SHEET_NAMES.ALL_IN);
+  clearDataManagerCache(); // Clear any existing cache
   Logger.log('Step 1 completed: Target sheet cleared');
 
   // Step 2: Make a hard copy of data from all_in_reduced to [HARD Copy] all_in_reduced
@@ -11,35 +12,27 @@ function main() {
   copyDataToTargetSheet(SHEET_NAMES.ALL_IN, SHEET_NAMES.ALL_IN_SOURCE);
   Logger.log('Step 2 completed: Data copied successfully');
 
-  // Add MANAGER column title
-  Logger.log('Adding MANAGER column title');
-  addLastColumnTitle(SHEET_NAMES.ALL_IN, COLUMN_NAMES.ALL_IN.MANAGER);
-  Logger.log('MANAGER column title added');
+  // Step 3: Initialize DataManager and load all required data
+  Logger.log('Step 3: Initializing data cache');
+  const dataManager = getDataManager();
+  dataManager.initializeAllData();
+  Logger.log('Step 3 completed: All data cached successfully');
 
-  // Prepare inconsistency sheet
-  // Logger.log('Preparing inconsistency sheet');
-  // prepareInconsistencySheet();
-  // Logger.log('Inconsistency sheet prepared');
+  // Step 4: Process managers and account types in parallel (data processing)
+  Logger.log('Step 4: Processing managers and account types');
+  const managerResults = assignManagersOptimized(dataManager);
+  const accountTypeResults = assignAccountTypesOptimized(dataManager);
+  Logger.log('Step 4 completed: Data processing finished');
 
-  // Step 3: Run assignManagers
-  Logger.log('Step 3: Starting manager assignment');
-  assignManagers();
-  Logger.log('Step 3 completed: Managers assigned');
+  // Step 5: Batch write all results at once
+  Logger.log('Step 5: Writing results in batch');
+  dataManager.batchWriteResults(SHEET_NAMES.ALL_IN, managerResults, accountTypeResults);
+  Logger.log('Step 5 completed: All results written successfully');
 
-  // Add ACCOUNT TYPE column title
-  Logger.log('Adding ACCOUNT TYPE column title');
-  addLastColumnTitle(SHEET_NAMES.ALL_IN, COLUMN_NAMES.ALL_IN.ACCOUNT_TYPE);
-  Logger.log('ACCOUNT TYPE column title added');
-
-  // Step 4: Run assignAccountTypes
-  Logger.log('Step 4: Starting account type assignment');
-  assignAccountTypes();
-  Logger.log('Step 4 completed: Account types assigned');
-
-  // Step 5: Find overlapping assignments
-  // Logger.log('Step 5: Finding overlapping assignments');
+  // Step 6: Find overlapping assignments (if needed)
+  // Logger.log('Step 6: Finding overlapping assignments');
   // findOverlappingAssignments();
-  // Logger.log('Step 5 completed: Overlapping assignments found');
+  // Logger.log('Step 6 completed: Overlapping assignments found');
 
   Logger.log('Main function execution completed successfully');
 }
