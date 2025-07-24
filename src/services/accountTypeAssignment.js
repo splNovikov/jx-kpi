@@ -19,7 +19,6 @@ function initializeAccountTypeColumnIndices() {
     }
   });
 
-  Logger.log(`Account Billability Types columns found: ${JSON.stringify(Object.keys(accountBillabilityIndices))}`);
 }
 
 function findAccountTypeColumnIndex(header, columnName) {
@@ -40,19 +39,19 @@ function findAccountTypeColumnIndex(header, columnName) {
 
 function prepareAccountBillabilityCache(accountBillabilityData) {
   const cache = new Map();
-  
+
   // For each column (except empty ones), collect all account names
   Object.keys(accountBillabilityIndices).forEach(columnName => {
     const columnIndex = accountBillabilityIndices[columnName];
     const accountsInColumn = [];
-    
+
     accountBillabilityData.rows.forEach(row => {
       const accountName = row[columnIndex];
       if (accountName && accountName.toString().trim() !== '') {
         accountsInColumn.push(accountName.toString().trim());
       }
     });
-    
+
     // Map each account to its column type
     accountsInColumn.forEach(accountName => {
       if (!cache.has(accountName)) {
@@ -62,7 +61,6 @@ function prepareAccountBillabilityCache(accountBillabilityData) {
     });
   });
 
-  Logger.log(`Account billability cache prepared with ${cache.size} accounts`);
   return cache;
 }
 
@@ -73,20 +71,19 @@ function findAccountTypeForAccount(account, accountBillabilityCache) {
 
   const accountName = account.toString().trim();
   const accountTypes = accountBillabilityCache.get(accountName) || [];
-  
+
   // Return the first matching type, or empty string if no match
   if (accountTypes.length > 0) {
-    Logger.log(`Account '${accountName}' found in types: ${accountTypes.join(', ')}`);
     return accountTypes[0]; // Return the first match
   }
-  
+
   Logger.log(`Account '${accountName}' not found in any billability type`);
   return '';
 }
 
 function assignAccountTypes() {
   Logger.log('Starting account type assignment');
-  
+
   // Initialize indices before processing
   initializeAccountTypeColumnIndices();
 
@@ -101,7 +98,7 @@ function assignAccountTypes() {
 
   allInData.rows.forEach((row, index) => {
     const account = row[accountTypeAllInIndices.account];
-    
+
     // Skip if account is in skip list
     if (SKIP_ACCOUNTS.includes(account)) {
       updates.push(['']);
@@ -118,4 +115,4 @@ function assignAccountTypes() {
   range.setValues(updates);
 
   Logger.log(`Account type assignment completed. Updated ${updates.length} rows`);
-} 
+}
