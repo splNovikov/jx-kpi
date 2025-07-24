@@ -1,38 +1,34 @@
 function main() {
-  Logger.log('Starting main function execution');
+  Logger.log('Starting main function execution - ULTIMATE OPTIMIZED VERSION');
 
-  // Step 1: Clear [HARD Copy] all_in_reduced
-  Logger.log('Step 1: Clearing target sheet');
+  // Step 1: Clear target sheet and cache
+  Logger.log('Step 1: Clearing target sheet and cache');
   clearTargetSheet(SHEET_NAMES.ALL_IN);
   clearDataManagerCache(); // Clear any existing cache
   Logger.log('Step 1 completed: Target sheet cleared');
 
-  // Step 2: Make a hard copy of data from all_in_reduced to [HARD Copy] all_in_reduced
-  Logger.log('Step 2: Copying data to target sheet');
-  copyDataToTargetSheet(SHEET_NAMES.ALL_IN, SHEET_NAMES.ALL_IN_SOURCE);
-  Logger.log('Step 2 completed: Data copied successfully');
-
-  // Step 3: Initialize DataManager and load all required data
-  Logger.log('Step 3: Initializing data cache');
+  // Step 2: Initialize DataManager and load all required data from source
+  Logger.log('Step 2: Initializing data cache from source');
   const dataManager = getDataManager();
-  dataManager.initializeAllData();
-  Logger.log('Step 3 completed: All data cached successfully');
+  dataManager.initializeAllData(); // Loads from ALL_IN_SOURCE directly
+  Logger.log('Step 2 completed: All source data cached successfully');
 
-  // Step 4: Process managers and account types in parallel (data processing)
-  Logger.log('Step 4: Processing managers and account types');
+  // Step 3: Process managers and account types using cached data
+  Logger.log('Step 3: Processing managers and account types');
   const managerResults = assignManagersOptimized(dataManager);
   const accountTypeResults = assignAccountTypesOptimized(dataManager);
-  Logger.log('Step 4 completed: Data processing finished');
+  Logger.log('Step 3 completed: Data processing finished');
 
-  // Step 5: Batch write all results at once
-  Logger.log('Step 5: Writing results in batch');
-  dataManager.batchWriteResults(SHEET_NAMES.ALL_IN, managerResults, accountTypeResults);
-  Logger.log('Step 5 completed: All results written successfully');
+  // Step 4: ULTIMATE OPTIMIZATION - Write everything in single batch operation
+  // This includes: original data + manager column + account type column
+  Logger.log('Step 4: Writing complete dataset in single mega-batch operation');
+  dataManager.batchWriteCompleteData(SHEET_NAMES.ALL_IN, managerResults, accountTypeResults);
+  Logger.log('Step 4 completed: Complete dataset written in single operation!');
 
-  // Step 6: Find overlapping assignments (if needed)
-  // Logger.log('Step 6: Finding overlapping assignments');
+  // Step 5: Find overlapping assignments (if needed)
+  // Logger.log('Step 5: Finding overlapping assignments');
   // findOverlappingAssignments();
-  // Logger.log('Step 6 completed: Overlapping assignments found');
+  // Logger.log('Step 5 completed: Overlapping assignments found');
 
-  Logger.log('Main function execution completed successfully');
+  Logger.log('ULTIMATE OPTIMIZED execution completed successfully - Maximum performance achieved!');
 }

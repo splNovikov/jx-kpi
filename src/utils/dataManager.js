@@ -3,6 +3,7 @@ class DataManager {
   constructor() {
     this.cache = new Map();
     this.initialized = false;
+    this.maxCacheSize = 50000; // Примерно 50k строк - безопасный лимит для Google Apps Script
   }
 
   // Load all required data at once to minimize API calls
@@ -11,15 +12,18 @@ class DataManager {
       return;
     }
 
-    Logger.log('DataManager: Loading all required data...');
+    Logger.log('DataManager: Loading all required data from source...');
     
-    // Load all sheets data in parallel conceptually (Google Apps Script limitation)
-    const allInData = getSheetData(SHEET_NAMES.ALL_IN);
+    // Load source data directly (not the copied version)
+    const sourceData = getSheetData(SHEET_NAMES.ALL_IN_SOURCE);
     const managerData = getSheetData(SHEET_NAMES.MANAGER_ASSIGNMENTS);
     const accountBillabilityData = getSheetData(SHEET_NAMES.ACCOUNT_BILLABILITY_TYPES);
 
+    // Check cache size limits
+    this.checkCacheSize(sourceData, 'source data');
+
     // Cache the data
-    this.cache.set('ALL_IN', allInData);
+    this.cache.set('SOURCE_DATA', sourceData);
     this.cache.set('MANAGER_ASSIGNMENTS', managerData);
     this.cache.set('ACCOUNT_BILLABILITY_TYPES', accountBillabilityData);
 
@@ -28,7 +32,18 @@ class DataManager {
     this.prepareAccountBillabilityCache(accountBillabilityData);
 
     this.initialized = true;
-    Logger.log('DataManager: All data loaded and cached successfully');
+    Logger.log('DataManager: All source data loaded and cached successfully');
+  }
+
+  // Check if cache size is within limits
+  checkCacheSize(data, dataName) {
+    const rowCount = data.rows ? data.rows.length : 0;
+    if (rowCount > this.maxCacheSize) {
+      Logger.log(`Warning: ${dataName} has ${rowCount} rows, which exceeds recommended cache size of ${this.maxCacheSize}`);
+      Logger.log('Consider processing in chunks if performance issues occur');
+    } else {
+      Logger.log(`DataManager: ${dataName} size OK - ${rowCount} rows`);
+    }
   }
 
   // Get cached sheet data
@@ -37,6 +52,11 @@ class DataManager {
       throw new Error('DataManager not initialized. Call initializeAllData() first.');
     }
     return this.cache.get(sheetName);
+  }
+
+  // Get source data (original data from ALL_IN_SOURCE)
+  getSourceData() {
+    return this.getCachedData('SOURCE_DATA');
   }
 
   // Prepare manager data cache (similar to existing logic)
@@ -117,33 +137,70 @@ class DataManager {
     return index;
   }
 
-  // Batch write results to minimize API calls
-  batchWriteResults(sheetName, managerResults, accountTypeResults) {
-    const sheet = getSheet(sheetName);
-    const allInData = this.getCachedData('ALL_IN');
+  // Ultimate optimization: Write everything in one batch operation
+  batchWriteCompleteData(targetSheetName, managerResults, accountTypeResults) {
+    const sourceData = this.getSourceData();
+    const sheet = getSheet(targetSheetName);
     
-    // Add both column headers at once
-    const lastColumn = sheet.getLastColumn();
-    const headerRange = sheet.getRange(1, lastColumn + 1, 1, 2);
-    headerRange.setValues([[COLUMN_NAMES.ALL_IN.MANAGER, COLUMN_NAMES.ALL_IN.ACCOUNT_TYPE]]);
+    Logger.log('DataManager: Preparing complete data batch write...');
 
-    // Combine both result arrays
-    const combinedResults = [];
-    for (let i = 0; i < managerResults.length; i++) {
-      combinedResults.push([managerResults[i][0], accountTypeResults[i][0]]);
+    // Clear target sheet first
+    sheet.clear();
+    clearSheetCache();
+
+    // Prepare headers: original + new columns
+    const originalHeaders = [...sourceData.header];
+    const completeHeaders = [...originalHeaders, COLUMN_NAMES.ALL_IN.MANAGER, COLUMN_NAMES.ALL_IN.ACCOUNT_TYPE];
+
+    // Prepare complete data: original + new columns
+    const completeData = [completeHeaders]; // Start with headers
+
+    // Combine original rows with new column data
+    sourceData.rows.forEach((originalRow, index) => {
+      const managerValue = managerResults[index] ? managerResults[index][0] : '';
+      const accountTypeValue = accountTypeResults[index] ? accountTypeResults[index][0] : '';
+      
+      const completeRow = [...originalRow, managerValue, accountTypeValue];
+      completeData.push(completeRow);
+    });
+
+    // Check final data size
+    Logger.log(`DataManager: Writing ${completeData.length} rows with ${completeHeaders.length} columns`);
+    
+    // Single mega-batch write operation
+    const totalRows = completeData.length;
+    const totalCols = completeHeaders.length;
+    
+    if (totalRows > 0 && totalCols > 0) {
+      const range = sheet.getRange(1, 1, totalRows, totalCols);
+      range.setValues(completeData);
+      Logger.log(`DataManager: Successfully wrote complete dataset in single operation!`);
+    } else {
+      Logger.log('DataManager: No data to write');
     }
 
-    // Write all data at once
-    const dataRange = sheet.getRange(2, lastColumn + 1, combinedResults.length, 2);
-    dataRange.setValues(combinedResults);
-
-    Logger.log(`DataManager: Batch wrote ${combinedResults.length} rows with both manager and account type data`);
+    // Log memory usage
+    this.logMemoryUsage(completeData);
   }
 
-  // Clear cache
+  // Log memory usage for monitoring
+  logMemoryUsage(data) {
+    const rowCount = data.length;
+    const avgColCount = data.length > 0 ? data[0].length : 0;
+    const estimatedCells = rowCount * avgColCount;
+    
+    Logger.log(`Memory usage: ${rowCount} rows × ${avgColCount} cols = ${estimatedCells} cells`);
+    
+    if (estimatedCells > 200000) {
+      Logger.log('Warning: Large dataset - monitor performance');
+    }
+  }
+
+  // Clear cache and free memory
   clearCache() {
     this.cache.clear();
     this.initialized = false;
+    Logger.log('DataManager: Cache cleared, memory freed');
   }
 }
 

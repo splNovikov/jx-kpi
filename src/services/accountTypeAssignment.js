@@ -121,15 +121,15 @@ function assignAccountTypes() {
 function assignAccountTypesOptimized(dataManager) {
   Logger.log('Starting optimized account type assignment');
   
-  const allInData = dataManager.getCachedData('ALL_IN');
+  const sourceData = dataManager.getSourceData(); // Изменено: теперь работаем с источником
   const accountBillabilityCacheData = dataManager.getAccountBillabilityCache();
   
-  const accountIndex = dataManager.findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT);
+  const accountIndex = dataManager.findColumnIndex(sourceData.header, COLUMN_NAMES.ALL_IN.ACCOUNT);
 
   // Prepare results array
   const results = [];
 
-  allInData.rows.forEach((row) => {
+  sourceData.rows.forEach((row) => {
     const account = row[accountIndex];
     
     // Skip if account is in skip list

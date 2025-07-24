@@ -232,16 +232,16 @@ function assignManagers() {
 function assignManagersOptimized(dataManager) {
   Logger.log('Starting optimized manager assignment');
   
-  const allInData = dataManager.getCachedData('ALL_IN');
+  const sourceData = dataManager.getSourceData(); // Изменено: теперь работаем с источником
   const managerCacheData = dataManager.getManagerCache();
   
-  const accountIndex = dataManager.findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.ACCOUNT);
-  const monthIndex = dataManager.findColumnIndex(allInData.header, COLUMN_NAMES.ALL_IN.MONTH);
+  const accountIndex = dataManager.findColumnIndex(sourceData.header, COLUMN_NAMES.ALL_IN.ACCOUNT);
+  const monthIndex = dataManager.findColumnIndex(sourceData.header, COLUMN_NAMES.ALL_IN.MONTH);
 
   // Prepare results array
   const results = [];
 
-  allInData.rows.forEach((row) => {
+  sourceData.rows.forEach((row) => {
     const account = row[accountIndex];
 
     // Check for special account mapping first
