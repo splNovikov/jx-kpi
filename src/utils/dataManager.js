@@ -4,7 +4,8 @@ class DataManager {
     this.cache = new Map();
     this.initialized = false;
     this.maxCacheSize = 50000; // Примерно 50k строк - безопасный лимит для Google Apps Script
-    this.writeChunkSize = 5000; // Optimal chunk size for batch writes (configurable)
+    this.maxCellsPerChunk = 50000; // Safe cell limit per chunk to prevent timeouts
+    this.minRowsPerChunk = 100; // Minimum rows per chunk to avoid too many small chunks
     this.chunkDelayMs = 100; // Small delay between chunks to prevent throttling
   }
 
@@ -174,10 +175,10 @@ class DataManager {
       return;
     }
 
-    Logger.log(`DataManager: Writing ${totalRows} rows with ${totalCols} columns in chunks of ${this.writeChunkSize}`);
+    Logger.log(`DataManager: Preparing to write ${totalRows} rows with ${totalCols} columns`);
     
     try {
-      // Write data in chunks to prevent timeout
+      // Write data in chunks to prevent timeout (adaptive cell-based chunking)
       this.writeDataInChunks(sheet, completeData, totalCols);
       Logger.log(`DataManager: Successfully wrote complete dataset in chunked operations!`);
     } catch (error) {
@@ -189,28 +190,34 @@ class DataManager {
     this.logMemoryUsage(completeData);
   }
 
-  // Write data in chunks with progress tracking and error handling
+  // Write data in chunks with progress tracking and error handling (adaptive cell-based)
   writeDataInChunks(sheet, completeData, totalCols) {
     const totalRows = completeData.length;
-    const chunkSize = this.writeChunkSize;
+    
+    // Calculate optimal chunk size based on total cells (rows × columns)
+    // Target: maxCellsPerChunk cells per write operation
+    const calculatedChunkSize = Math.floor(this.maxCellsPerChunk / totalCols);
+    const chunkSize = Math.max(this.minRowsPerChunk, calculatedChunkSize);
     const numChunks = Math.ceil(totalRows / chunkSize);
     
-    Logger.log(`DataManager: Processing ${numChunks} chunk(s)...`);
+    Logger.log(`DataManager: Adaptive chunking - ${totalCols} columns, ${chunkSize} rows per chunk (max ${chunkSize * totalCols} cells)`);
+    Logger.log(`DataManager: Processing ${numChunks} chunk(s) for ${totalRows} total rows...`);
 
     for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
       const startRow = chunkIndex * chunkSize;
       const endRow = Math.min(startRow + chunkSize, totalRows);
       const chunk = completeData.slice(startRow, endRow);
       const chunkLength = chunk.length;
+      const chunkCells = chunkLength * totalCols;
       
-      Logger.log(`DataManager: Writing chunk ${chunkIndex + 1}/${numChunks} (rows ${startRow + 1}-${endRow})...`);
+      Logger.log(`DataManager: Writing chunk ${chunkIndex + 1}/${numChunks} (rows ${startRow + 1}-${endRow}, ${chunkCells} cells)...`);
       
       try {
         // Write chunk to sheet
         const range = sheet.getRange(startRow + 1, 1, chunkLength, totalCols);
         range.setValues(chunk);
         
-        Logger.log(`DataManager: Chunk ${chunkIndex + 1}/${numChunks} written successfully (${chunkLength} rows)`);
+        Logger.log(`DataManager: Chunk ${chunkIndex + 1}/${numChunks} written successfully (${chunkLength} rows, ${chunkCells} cells)`);
         
         // Add small delay between chunks to prevent throttling (except for last chunk)
         if (chunkIndex < numChunks - 1) {
