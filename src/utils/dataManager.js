@@ -4,6 +4,8 @@ class DataManager {
     this.cache = new Map();
     this.initialized = false;
     this.maxCacheSize = 50000; // Примерно 50k строк - безопасный лимит для Google Apps Script
+    this.writeChunkSize = 5000; // Optimal chunk size for batch writes (configurable)
+    this.chunkDelayMs = 100; // Small delay between chunks to prevent throttling
   }
 
   // Load all required data at once to minimize API calls
@@ -137,12 +139,12 @@ class DataManager {
     return index;
   }
 
-  // Ultimate optimization: Write everything in one batch operation
+  // Optimized chunked batch write to prevent timeouts
   batchWriteCompleteData(targetSheetName, managerResults, accountTypeResults) {
     const sourceData = this.getSourceData();
     const sheet = getSheet(targetSheetName);
     
-    Logger.log('DataManager: Preparing complete data batch write...');
+    Logger.log('DataManager: Preparing chunked batch write...');
 
     // Clear target sheet first
     sheet.clear();
@@ -164,23 +166,64 @@ class DataManager {
       completeData.push(completeRow);
     });
 
-    // Check final data size
-    Logger.log(`DataManager: Writing ${completeData.length} rows with ${completeHeaders.length} columns`);
-    
-    // Single mega-batch write operation
     const totalRows = completeData.length;
     const totalCols = completeHeaders.length;
     
-    if (totalRows > 0 && totalCols > 0) {
-      const range = sheet.getRange(1, 1, totalRows, totalCols);
-      range.setValues(completeData);
-      Logger.log(`DataManager: Successfully wrote complete dataset in single operation!`);
-    } else {
+    if (totalRows === 0 || totalCols === 0) {
       Logger.log('DataManager: No data to write');
+      return;
+    }
+
+    Logger.log(`DataManager: Writing ${totalRows} rows with ${totalCols} columns in chunks of ${this.writeChunkSize}`);
+    
+    try {
+      // Write data in chunks to prevent timeout
+      this.writeDataInChunks(sheet, completeData, totalCols);
+      Logger.log(`DataManager: Successfully wrote complete dataset in chunked operations!`);
+    } catch (error) {
+      Logger.log(`DataManager ERROR: Failed to write data - ${error.message}`);
+      throw new Error(`Failed to write data to ${targetSheetName}: ${error.message}`);
     }
 
     // Log memory usage
     this.logMemoryUsage(completeData);
+  }
+
+  // Write data in chunks with progress tracking and error handling
+  writeDataInChunks(sheet, completeData, totalCols) {
+    const totalRows = completeData.length;
+    const chunkSize = this.writeChunkSize;
+    const numChunks = Math.ceil(totalRows / chunkSize);
+    
+    Logger.log(`DataManager: Processing ${numChunks} chunk(s)...`);
+
+    for (let chunkIndex = 0; chunkIndex < numChunks; chunkIndex++) {
+      const startRow = chunkIndex * chunkSize;
+      const endRow = Math.min(startRow + chunkSize, totalRows);
+      const chunk = completeData.slice(startRow, endRow);
+      const chunkLength = chunk.length;
+      
+      Logger.log(`DataManager: Writing chunk ${chunkIndex + 1}/${numChunks} (rows ${startRow + 1}-${endRow})...`);
+      
+      try {
+        // Write chunk to sheet
+        const range = sheet.getRange(startRow + 1, 1, chunkLength, totalCols);
+        range.setValues(chunk);
+        
+        Logger.log(`DataManager: Chunk ${chunkIndex + 1}/${numChunks} written successfully (${chunkLength} rows)`);
+        
+        // Add small delay between chunks to prevent throttling (except for last chunk)
+        if (chunkIndex < numChunks - 1) {
+          Utilities.sleep(this.chunkDelayMs);
+        }
+      } catch (chunkError) {
+        Logger.log(`DataManager ERROR: Failed to write chunk ${chunkIndex + 1} (rows ${startRow + 1}-${endRow})`);
+        Logger.log(`Error details: ${chunkError.message}`);
+        throw new Error(`Chunk write failed at row ${startRow + 1}: ${chunkError.message}`);
+      }
+    }
+    
+    Logger.log(`DataManager: All ${numChunks} chunk(s) written successfully!`);
   }
 
   // Log memory usage for monitoring
