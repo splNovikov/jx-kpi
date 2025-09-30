@@ -4,9 +4,9 @@ class DataManager {
     this.cache = new Map();
     this.initialized = false;
     this.maxCacheSize = 50000; // Примерно 50k строк - безопасный лимит для Google Apps Script
-    this.maxCellsPerChunk = 50000; // Safe cell limit per chunk to prevent timeouts
+    this.maxCellsPerChunk = 15000; // Conservative cell limit per chunk for reliable writes (prevents timeouts)
     this.minRowsPerChunk = 100; // Minimum rows per chunk to avoid too many small chunks
-    this.chunkDelayMs = 100; // Small delay between chunks to prevent throttling
+    this.chunkDelayMs = 200; // Delay between chunks to let API recover and prevent throttling
   }
 
   // Load all required data at once to minimize API calls
