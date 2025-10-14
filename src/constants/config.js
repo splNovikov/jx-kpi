@@ -37,8 +37,8 @@ const COLUMN_NAMES = {
 // Special mapping for accounts that never had a manager
 const SPECIAL_ACCOUNT_MANAGERS = {
   "Bench": "Bench-MANAGER",
-  "Department: Engineering": "Department: Engineering-MANAGER",
-  "Department: Delivery": "Department: Delivery-MANAGER",
-  "Department: Operations": "Department: Operations-MANAGER",
-  "Department: HR": "Department: HR-MANAGER"
+  // "Department: Engineering": "Department: Engineering-MANAGER",
+  // "Department: Delivery": "Department: Delivery-MANAGER",
+  // "Department: Operations": "Department: Operations-MANAGER",
+  // "Department: HR": "Department: HR-MANAGER"
 };
