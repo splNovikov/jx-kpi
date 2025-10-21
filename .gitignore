@@ -1,6 +1,7 @@
 # Ignore Google Apps Script clasp system files
 .clasp.json
 .claspPROD.json
+clasprc-for-b64.json
 
 # Ignore IDE/project files
 .idea/
