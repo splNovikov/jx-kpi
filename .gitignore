@@ -1,5 +1,6 @@
 # Ignore Google Apps Script clasp system files
 .clasp.json
+.claspPROD.json
 
 # Ignore IDE/project files
 .idea/
@@ -25,4 +26,4 @@ __pycache__/
 /build/
 
 # Logs
-*.log 
+*.log
