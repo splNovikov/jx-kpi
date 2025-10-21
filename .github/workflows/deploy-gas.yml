@@ -22,12 +22,12 @@ jobs:
         run: npm install -g @google/clasp
 
       - name: Create .clasprc.json from BASE64
-        run: echo "${{ secrets.CLASPRC_JSON_B64_PROD }}" | base64 --decode > ~/.clasprc.json
+        run: echo "${{ secrets.CLASPRC_JSON_B64 }}" | base64 --decode > ~/.clasprc.json
 
       - name: Create .clasp.json
         run: |
           echo '{
-            "scriptId": "${{ secrets.SCRIPT_ID_PROD }}",
+            "scriptId": "${{ secrets.SCRIPT_ID }}",
             "rootDir": "./src"
           }' > .clasp.json
 
