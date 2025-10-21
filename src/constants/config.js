@@ -1,4 +1,4 @@
-const SKIP_ACCOUNTS = ["", "12345", "Terminated", "Cost Exclusions"];
+const SKIP_ACCOUNTS = ["", "Terminated", "Cost Exclusions"];
 
 const SHEET_NAMES = {
   ALL_IN: "[HARD Copy] all_in_reduced",
