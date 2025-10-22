@@ -14,6 +14,7 @@ function getSheet(sheetName) {
 }
 
 function getSheetData(sheetName) {
+  console.log(sheetName);
   const sheet = getSheet(sheetName);
   const data = sheet.getDataRange().getValues();
 

@@ -2,11 +2,11 @@ const SKIP_ACCOUNTS = ["", "Terminated", "Cost Exclusions"];
 
 const SHEET_NAMES = {
   ALL_IN: "[HARD Copy] all_in_reduced",
-  ALL_IN_SOURCE: "all_in_reduced",
-  MANAGER_ASSIGNMENTS: "Manager-Account assignments",
+  ALL_IN_SOURCE: "import_all_in_reduced",
+  MANAGER_ASSIGNMENTS: "import_Manager_Account_assignments",
   MANAGER_INCONSISTENCY: "Manager assignment inconsistency",
   MANAGER_OVERLAPS: "Manager-Account assignments overlap",
-  ACCOUNT_BILLABILITY_TYPES: "Account Billability Types"
+  ACCOUNT_BILLABILITY_TYPES: "import_Account_Billability_Types"
 };
 
 const COLUMN_NAMES = {
